@@ -38,6 +38,6 @@ public class UserEntity {
     private ProfileEntity profile;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "ENUM('SUPER_ADMIN', 'ADMIN', 'HR', 'MANAGER', 'EMPLOYEE') DEFAULT 'EMPLOYEE'")
-    private RoleName role;
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'EMPLOYEE'")
+    private RoleName role = RoleName.EMPLOYEE;
 }
