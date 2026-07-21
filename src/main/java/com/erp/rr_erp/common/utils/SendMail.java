@@ -18,11 +18,11 @@ public class SendMail {
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            
+
             helper.setTo(to);
             helper.setSubject("Verification Code");
             helper.setText(template, true);
-            
+
             mailSender.send(message);
         } catch (Exception e) {
             throw e;
@@ -33,11 +33,11 @@ public class SendMail {
         return """
                 <!DOCTYPE html>
                 <html>
-                
+
                 <body>
                     <p>Your verification code is: %d</p>
                 </body>
-                
+
                 </html>""".formatted(code);
     }
 }

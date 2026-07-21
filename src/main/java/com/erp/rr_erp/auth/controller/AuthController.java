@@ -1,6 +1,7 @@
 package com.erp.rr_erp.auth.controller;
 
 import com.erp.rr_erp.auth.dto.SendOtpRequest;
+import com.erp.rr_erp.auth.dto.VerifyOtpRequest;
 import com.erp.rr_erp.auth.service.AuthService;
 import jakarta.validation.Valid;
 import java.util.Map;
@@ -20,10 +21,24 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(@Valid @RequestBody SendOtpRequest request) {
+    public ResponseEntity<?> sendOtp(@Valid @RequestBody SendOtpRequest request) throws Exception{
         try {
             authService.sendOtp(request.getEmail());
             return ResponseEntity.ok(Map.of("message", "OTP sent successfully to " + request.getEmail()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@Valid @RequestBody VerifyOtpRequest body ){
+        try {
+            authService.verifyOtp(body.getEmail(), Integer.parseInt(body.getCode()));
+            return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "OTP code must be a valid number"));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", e.getMessage()));
