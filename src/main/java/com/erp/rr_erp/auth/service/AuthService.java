@@ -13,6 +13,7 @@ import com.erp.rr_erp.auth.dto.ProfileDto;
 import com.erp.rr_erp.auth.dto.SignupDto;
 import com.erp.rr_erp.auth.dto.UpdateProfileDto;
 import com.erp.rr_erp.auth.entity.OtpEntity;
+import com.erp.rr_erp.auth.entity.ProfileEntity;
 import com.erp.rr_erp.auth.entity.UserEntity;
 import com.erp.rr_erp.auth.repository.AuthRepository;
 import com.erp.rr_erp.auth.repository.OtpRepository;
@@ -88,10 +89,14 @@ public class AuthService {
             throw new Exception("Email not verified. Please verify your email first.");
         }
 
+        ProfileEntity profile = new ProfileEntity();
+
         UserEntity ue = new UserEntity();
         ue.setFullName(dto.getFullName());
         ue.setEmail(dto.getEmail());
         ue.setPassword(passwordEncoder.encode(dto.getPassword()));
+        ue.setIsEmailVerified(true);
+        ue.setProfile(profile);
         authRepository.save(ue);
 
         otpRepository.delete(otpOpt.get());
@@ -113,28 +118,40 @@ public class AuthService {
         UserEntity user = authRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found"));
 
-        ProfileDto profileDto = new ProfileDto();
-        profileDto.setFullName(user.getFullName());
-        profileDto.setEmail(user.getEmail());
-        profileDto.setRole(user.getRole());
+        ProfileDto dto = new ProfileDto();
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
 
         if (user.getProfile() != null) {
-            profileDto.setBio(user.getProfile().getBio());
-            profileDto.setProfilePictureUrl(user.getProfile().getProfilePictureUrl());
+            dto.setBio(user.getProfile().getBio());
+            dto.setProfilePictureUrl(user.getProfile().getProfilePictureUrl());
         }
 
-        return profileDto;
+        return dto;
     }
 
-    public void updateProfile(String email, UpdateProfileDto dto) throws Exception {
+    public ProfileDto updateProfile(String email, UpdateProfileDto dto) throws Exception {
         UserEntity user = authRepository.findByEmail(email)
                 .orElseThrow(() -> new Exception("User not found"));
 
-        user.setFullName(dto.getFullName());
-        if (user.getProfile() != null) {
+        if (dto.getFullName() != null) {
+            user.setFullName(dto.getFullName());
+        }
+
+        if (user.getProfile() == null) {
+            user.setProfile(new ProfileEntity());
+        }
+
+        if (dto.getBio() != null) {
             user.getProfile().setBio(dto.getBio());
+        }
+
+        if (dto.getProfilePictureUrl() != null) {
             user.getProfile().setProfilePictureUrl(dto.getProfilePictureUrl());
         }
+
         authRepository.save(user);
+        return getProfile(email);
     }
 }

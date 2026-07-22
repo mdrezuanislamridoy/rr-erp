@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,14 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.erp.rr_erp.auth.dto.LoginDto;
 import com.erp.rr_erp.auth.dto.LoginResponse;
+import com.erp.rr_erp.auth.dto.ProfileDto;
 import com.erp.rr_erp.auth.dto.SendOtpRequest;
 import com.erp.rr_erp.auth.dto.SignupDto;
+import com.erp.rr_erp.auth.dto.UpdateProfileDto;
 import com.erp.rr_erp.auth.dto.VerifyOtpRequest;
 import com.erp.rr_erp.auth.service.AuthService;
 import com.erp.rr_erp.common.annotation.CurrentUser;
 
 import jakarta.validation.Valid;
-
 
 @RestController
 @RequestMapping("/api")
@@ -75,7 +77,18 @@ public class AuthController {
     @GetMapping("/user/profile")
     public ResponseEntity<?> getProfile(@CurrentUser UserDetails userDetails) {
         try {
-            return ResponseEntity.ok(authService.getProfile(userDetails.getUsername()));
+            ProfileDto profile = authService.getProfile(userDetails.getUsername());
+            return ResponseEntity.ok(profile);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/user/profile")
+    public ResponseEntity<?> updateProfile(@CurrentUser UserDetails userDetails, @Valid @RequestBody UpdateProfileDto dto) {
+        try {
+            ProfileDto updated = authService.updateProfile(userDetails.getUsername(), dto);
+            return ResponseEntity.ok(updated);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
