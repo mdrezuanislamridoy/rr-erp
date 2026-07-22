@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import com.erp.rr_erp.auth.dto.LoginDto;
 import com.erp.rr_erp.auth.dto.LoginResponse;
+import com.erp.rr_erp.auth.dto.ProfileDto;
 import com.erp.rr_erp.auth.dto.SignupDto;
+import com.erp.rr_erp.auth.dto.UpdateProfileDto;
 import com.erp.rr_erp.auth.entity.OtpEntity;
 import com.erp.rr_erp.auth.entity.UserEntity;
 import com.erp.rr_erp.auth.repository.AuthRepository;
@@ -105,5 +107,34 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
         return new LoginResponse(token, user.getId(), user.getFullName(), user.getEmail(), user.getRole());
+    }
+
+    public ProfileDto getProfile(String email) throws Exception {
+        UserEntity user = authRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception("User not found"));
+
+        ProfileDto profileDto = new ProfileDto();
+        profileDto.setFullName(user.getFullName());
+        profileDto.setEmail(user.getEmail());
+        profileDto.setRole(user.getRole());
+
+        if (user.getProfile() != null) {
+            profileDto.setBio(user.getProfile().getBio());
+            profileDto.setProfilePictureUrl(user.getProfile().getProfilePictureUrl());
+        }
+
+        return profileDto;
+    }
+
+    public void updateProfile(String email, UpdateProfileDto dto) throws Exception {
+        UserEntity user = authRepository.findByEmail(email)
+                .orElseThrow(() -> new Exception("User not found"));
+
+        user.setFullName(dto.getFullName());
+        if (user.getProfile() != null) {
+            user.getProfile().setBio(dto.getBio());
+            user.getProfile().setProfilePictureUrl(dto.getProfilePictureUrl());
+        }
+        authRepository.save(user);
     }
 }
