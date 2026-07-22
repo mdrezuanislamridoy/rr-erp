@@ -41,6 +41,6 @@ public class UserEntity {
     private ProfileEntity profile;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "varchar(20) default 'EMPLOYEE'")
+    @Column(nullable = false, length = 20)
     private RoleName role = RoleName.EMPLOYEE;
 }
